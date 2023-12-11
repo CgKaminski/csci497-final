@@ -1,6 +1,7 @@
 from scipy.signal import butter, sosfilt
 import pandas
 import matplotlib.pyplot as plt
+import pywt
 
 def main():
     ecog_path = 'data/ECoG.csv'
@@ -29,6 +30,10 @@ def main():
     # form M
     
     return
+
+def dwt(data):
+    # pywt.cwt
+    
 def band_pass_filter(data):
     fs = 1000 # 1 kHz == 1000Hz sampling rate
     nyq = 0.5 * fs # calculate nyquist 
