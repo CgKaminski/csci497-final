@@ -62,14 +62,17 @@ def car(data):
     avg_reference = data - np.mean(data, axis=0)
     return avg_reference
 
-def downsample(data, original_fs=1000, target_fs=20):
+def downsample(df , original_fs=1000, target_fs=20):
+    data = df.values
+    times = df['MotionTime'].values
     factor = int(original_fs / target_fs)
     downsampled_data = data[::factor]
-    return downsampled_data
+    downsampled_time = times[::factor]
+    return downsampled_data, downsampled_time
 
 def morlet_wavelet_transform(batch, fs):
     ''' input - ecog data in time window for a single neuron
-        output - scalogram for that window '''
+        output - scalogram, scalogram_bin, normalized_scalogram  '''
 
     center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
     num_freqs = 10
@@ -89,7 +92,7 @@ def morlet_wavelet_transform(batch, fs):
 
     normalized_scalogram = (scalogram_bin - mean[:, np.newaxis]) / std[:, np.newaxis]
 
-    return normalized_scalogram 
+    return scalogram, scalogram_bin, normalized_scalogram 
     
 
 

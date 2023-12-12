@@ -7,22 +7,38 @@ import torch
 import matplotlib.pyplot as plt
 
 
+
+inputs = pd.read_csv('data/inputs.csv', delimiter='|')
+outputs = pd.read_csv('data/outputs.csv', delimiter='|')
+
+
+
+breakpoint()
+
 fs = 1000 # sampling freq (Hz)
 ecog_data, motion_data = load_data()
 
-batch = ecog_data.head(1100)
+for key in tqdm(ecog_data.keys()[1:], desc='Band Pass Filter'):
+    ecog_data[key] = band_pass_filter(ecog_data[key])
 
-for key in tqdm(batch.keys()[1:], desc='Band Pass Filter'):
-    batch[key] = band_pass_filter(batch[key])
-
-filt_ecog_data = batch.values[:,1:]
+filt_ecog_data = ecog_data.values[:,1:]
 car_ecog_data = car(filt_ecog_data)
-downsampled_hand_data = downsample(motion_data.values[:,-3:])
+hand_data, time = downsample(motion_data)
 
+hand_df = pd.DataFrame(np.concatenate((time.reshape(-1,1), hand_data), axis=1), columns=['Time', 'Hand:x', 'Hand:y', 'Hand:z'])
+hand_df = hand_df[hand_df['Time'] > 1.1]
 
-for start_time in time - 1100:
-    for n in neurons:
-        batch = ecog_data[n][start_time:start_time+1100]
-        wavelet_scalogram = morlet_wavelet_transform(ecog_data['ECoG_ch1'].values, 1000)
+input_dataset = []
+for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all time steps'):
+    neuron_data = []
+    for neuron in range(64):
+        start_index = ecog_data.index[ecog_data['ECoG_time'] == start_time][0]
+        batch = car_ecog_data[:,neuron][start_index-1100:start_index]
+        _, _, wavelet_scalogram = morlet_wavelet_transform(batch, 1000)
+        neuron_data.append(wavelet_scalogram.flatten())
+    time_data = np.hstack(neuron_data)
+    del neuron_data
+    input_dataset.append(time_data)
 
-breakpoint()
+input_df = np.vstack(input_dataset)
+input_df = pd.DataFrame(input_df)
