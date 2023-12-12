@@ -15,7 +15,6 @@ class K1Dataset(torch.utils.data.Dataset):
 
         # Return Experimentor's hand position
         target = self.motion.iloc[idx].values[-3:]
-
         return torch.tensor(sample, dtype=torch.float32), torch.tensor(target, dtype=torch.float32)
 
     def get_in_out_size(self):
@@ -30,7 +29,6 @@ def load_data():
 
     ecog_df = pd.read_csv(ecog)
     motion_df = pd.read_csv(motion)
-
     # ecog_df = ecog_df[ecog_df['ECoG_time'].isin(motion_df['MotionTime'])]
 
     return ecog_df, motion_df

@@ -27,11 +27,12 @@ def main():
     # Scalogram at t calculated from t-1.1s to t
     # sample scalogram at 10 time lags (t-100ms, t-200ms, ..., t-1s) to form 10x10 scalogram matrix of time t
     # normalize scalogram by calcilating z-score at each freq bin
-    # pooling ? to form scalo vector
+    # pooling  to form scalo vector
     # PLS
     # form M
     
     return
+
 
 def band_pass_filter(data):
     fs = 1000 # 1 kHz == 1000Hz sampling rate
@@ -70,9 +71,20 @@ def downsample(df , original_fs=1000, target_fs=20):
     downsampled_time = times[::factor]
     return downsampled_data, downsampled_time
 
+# perform morlet
 def morlet_wavelet_transform(batch, fs):
-    ''' input - ecog data in time window for a single neuron
-        output - scalogram, scalogram_bin, normalized_scalogram  '''
+    '''
+    Performs Morlet Wavelet Transform on a batch and forms a scalogram.
+    
+    Input:
+       batch : ecog data in time window for a single neuron
+       fs : sampling frequency
+    
+    Output:
+       scalogram: original scalogram after wavelet transform
+       scalogram_bin : scalogram reshaped to 10x10
+       normalized_scalogram: normalized reshaped scalogram
+    '''
 
     center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
     num_freqs = 10

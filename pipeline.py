@@ -8,12 +8,12 @@ import matplotlib.pyplot as plt
 
 
 
-inputs = pd.read_csv('data/inputs.csv', delimiter='|')
-outputs = pd.read_csv('data/outputs.csv', delimiter='|')
+#inputs = pd.read_csv('data/inputs.csv', delimiter='|')
+#outputs = pd.read_csv('data/outputs.csv', delimiter='|')
 
 
 
-breakpoint()
+#breakpoint()
 
 fs = 1000 # sampling freq (Hz)
 ecog_data, motion_data = load_data()
@@ -23,10 +23,14 @@ for key in tqdm(ecog_data.keys()[1:], desc='Band Pass Filter'):
 
 filt_ecog_data = ecog_data.values[:,1:]
 car_ecog_data = car(filt_ecog_data)
-hand_data, time = downsample(motion_data)
 
-hand_df = pd.DataFrame(np.concatenate((time.reshape(-1,1), hand_data), axis=1), columns=['Time', 'Hand:x', 'Hand:y', 'Hand:z'])
+hand_data, time = downsample(motion_data[['MotionTime','Experimenter:RHNDx','Experimenter:RHNDy','Experimenter:RHNDz']])
+
+
+#hand_df = pd.DataFrame(np.concatenate((time.reshape(-1,1), hand_data), axis=1), columns=['Time', 'Hand:x', 'Hand:y', 'Hand:z'])
+hand_df = pd.DataFrame(hand_data, columns=['Time', 'Hand:x', 'Hand:y', 'Hand:z'])
 hand_df = hand_df[hand_df['Time'] > 1.1]
+hand_df.to_csv('data/targets.csv')
 
 input_dataset = []
 for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all time steps'):
@@ -42,3 +46,4 @@ for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all t
 
 input_df = np.vstack(input_dataset)
 input_df = pd.DataFrame(input_df)
+input_df.to_csv('data/preprocessed_input.csv')
