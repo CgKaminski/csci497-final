@@ -1,5 +1,8 @@
-from scipy.signal import butter, sosfilt
+from scipy.signal import butter, sosfilt, morlet2, spectrogram
+from tqdm import tqdm
 import pandas
+import pywt
+import numpy as np
 import matplotlib.pyplot as plt
 
 def main():
@@ -29,6 +32,7 @@ def main():
     # form M
     
     return
+
 def band_pass_filter(data):
     fs = 1000 # 1 kHz == 1000Hz sampling rate
     nyq = 0.5 * fs # calculate nyquist 
@@ -53,6 +57,41 @@ def band_pass_filter(data):
     filtered += list(sosfilt(sos, data))
 
     return filtered
+
+def car(data):
+    avg_reference = data - np.mean(data, axis=0)
+    return avg_reference
+
+def downsample(data, original_fs=1000, target_fs=20):
+    factor = int(original_fs / target_fs)
+    downsampled_data = data[::factor]
+    return downsampled_data
+
+def morlet_wavelet_transform(batch, fs):
+    ''' input - ecog data in time window for a single neuron
+        output - scalogram for that window '''
+
+    center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
+    num_freqs = 10
+    coarsest_scale = 7
+    time_window = int(1.1 * fs)
+
+    scalograms = []
+    
+    scalogram_t, _ = pywt.cwt(batch, center_freqs, 'morl')
+    scalogram = np.abs(scalogram_t)
+    
+    scalogram_bin = scalogram.reshape(10, 10, -1)
+    scalogram_bin = scalogram_bin.mean(axis=2)
+
+    mean = scalogram_bin.mean(axis=1)
+    std = scalogram_bin.std(axis=1)
+
+    normalized_scalogram = (scalogram_bin - mean[:, np.newaxis]) / std[:, np.newaxis]
+
+    return normalized_scalogram 
+    
+
 
 if __name__ == '__main__':
     main()
