@@ -28,6 +28,11 @@ def downsample(df , original_fs=1000, target_fs=20):
     downsampled_time = times[::factor]
     return downsampled_data, downsampled_time
 
+def normalize_targets(targets):
+    mean = np.mean(targets, axis=0)
+    std = np.std(targets, axis=0)
+    return (targets - mean ) /std
+
 def morlet_wavelet_transform(batch, fs):
     center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
 
