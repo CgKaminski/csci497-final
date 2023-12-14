@@ -1,5 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
+
+
+def calculate_r2(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3]) -> list[float]:
+    r2_scores = [r2_score(true_data[:, dim], pred_data[:, dim]) for dim in range(3)]
+    return r2_scores
 
 
 def plot_coordinates(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3], total_time: int = 5,
@@ -23,6 +29,13 @@ def plot_coordinates(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3
         for dim in range(num_dimensions):
             # Plot each dimension separately in mpl sub-plot
             axs[dim].plot(time_values, data[:, dim], label=f'{label} trajectories', color=color, linewidth=1)
+
+            # Calculate R-squared score
+            r2_scores = calculate_r2(true_data, pred_data)
+
+            # Annotate the subplot with R-squared score
+            axs[dim].text(0.9, 0.05, f'R2 Score: {r2_scores[dim]:.2f}', transform=axs[dim].transAxes, ha='center',
+                          va='center')
 
         axs[dim].set_xlabel('Time (min)')
 
