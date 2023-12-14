@@ -1,20 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.stats import pearsonr
 
 def calculate_correlation_coefficients(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3]) -> list[float]:
     correlation_coefficients = [np.corrcoef(true_data[:, dim], pred_data[:, dim])[0, 1] for dim in range(3)]
     return correlation_coefficients
 
-
 def plot_coordinates(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3], total_time: int = 5,
-                     file_name: str = "plot") -> None:
+                     file_name: str = "plot", plot_title: str = "Trajectory Plot") -> None:
     """
     Plots the coordinates of the true and predicted trajectories in 3 sub-plots (one for each dimension).
     :param true_data: The true trajectory data.
     :param pred_data: The predicted trajectory data.
     :param total_time: The total time of the trajectory, (assume 5min).
     :param file_name: The name of the file to save the plot to.
+    :param plot_title: The title of the plot.
     :return: None.
     """
     num_dimensions = 3
@@ -47,9 +48,11 @@ def plot_coordinates(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3
 
     axs[0].legend(bbox_to_anchor=(1.0, 1.35), loc="upper right", frameon=False, fontsize=14, ncol=1)
 
+    # Set the title of the entire plot
+    plt.suptitle(plot_title, fontsize=16)
+
     plt.tight_layout()
     plt.savefig(file_name)
-
 
 if __name__ == '__main__':
     # Load pred. data
@@ -59,6 +62,6 @@ if __name__ == '__main__':
     # Load motion data, extract last 3 cols. (x, y, z)
     motion_data = np.genfromtxt('../data/targets.csv', delimiter=',', skip_header=1)[-pls_data.shape[0]:, -3:]
 
-    # Plot coordinates
-    plot_coordinates(motion_data, pls_data, file_name='PLS_plot')
-    plot_coordinates(motion_data, xgb_data, file_name='XGB_plot')
+    # Plot coordinates with a title
+    plot_coordinates(motion_data, pls_data, file_name='PLS_plot', plot_title='PLS Trajectory Plot')
+    plot_coordinates(motion_data, xgb_data, file_name='XGB_plot', plot_title='XGB Trajectory Plot')
