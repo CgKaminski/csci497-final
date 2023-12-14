@@ -28,7 +28,7 @@ def main():
     # Scalogram at t calculated from t-1.1s to t
     # sample scalogram at 10 time lags (t-100ms, t-200ms, ..., t-1s) to form 10x10 scalogram matrix of time t
     # normalize scalogram by calcilating z-score at each freq bin
-    # pooling ? to form scalo vector
+    # pooling  to form scalo vector
     # PLS
     # form M
     
@@ -71,7 +71,8 @@ def band_pass_filter(data, lowcut=0.1, highcut=499, fs=1000, order=3):
 
 '''
 def car(data):
-    avg_reference = data - np.mean(data, axis=0)
+    # take average across each row (per time bin)
+    avg_reference = (data.T - np.mean(data, axis=1)).T
     return avg_reference
 '''
 def car(ecog_data):
@@ -87,7 +88,6 @@ def downsample(df , original_fs=1000, target_fs=20):
     downsampled_time = times[::factor]
     return downsampled_data, downsampled_time
 
-'''
 def morlet_wavelet_transform(batch, fs):
     center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
     num_freqs = 10
