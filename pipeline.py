@@ -18,7 +18,7 @@ fs = 1000 # sampling freq (Hz)
 ecog_data, motion_data = load_data()
 
 for key in tqdm(ecog_data.keys()[1:], desc='Band Pass Filter'):
-    ecog_data[key] = band_pass_filter(ecog_data[key])
+    ecog_data[key] = band_pass_filter(ecog_data[key].values)
 
 filt_ecog_data = ecog_data.values[:,1:]
 car_ecog_data = car(filt_ecog_data)
@@ -29,6 +29,7 @@ hand_data, time = downsample(motion_data[['MotionTime','Experimenter:RHNDx','Exp
 #hand_df = pd.DataFrame(np.concatenate((time.reshape(-1,1), hand_data), axis=1), columns=['Time', 'Hand:x', 'Hand:y', 'Hand:z'])
 hand_df = pd.DataFrame(hand_data, columns=['Time', 'Hand:x', 'Hand:y', 'Hand:z'])
 hand_df = hand_df[hand_df['Time'] > 1.1]
+
 hand_df.to_csv('data/targets.csv', index=False)
 
 input_dataset = []
@@ -37,7 +38,7 @@ for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all t
     for neuron in range(64):
         start_index = ecog_data.index[ecog_data['ECoG_time'] == start_time][0]
         batch = car_ecog_data[:,neuron][start_index-1100:start_index]
-        _, _, wavelet_scalogram = morlet_wavelet_transform(batch, 1000)
+        _, wavelet_scalogram, _ = morlet_wavelet_transform(batch, 1000)
         neuron_data.append(wavelet_scalogram.flatten())
     time_data = np.hstack(neuron_data)
     del neuron_data
