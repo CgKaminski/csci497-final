@@ -73,7 +73,7 @@ X_dev = X[val_idx:, :]
 y_dev = Y[val_idx:, :]
 
 
-
+'''
 print('PLS REGRESSION')
 pls = PLSRegression(n_components = 21)
 pls.fit(X_train, y_train)
@@ -96,17 +96,17 @@ print(f'training correlation coef = {t_corr}')
 print(f'dev $R^2$ = {v_r2}')
 print(f'dev correlation coef = {v_corr}\n\n\n')
 np.savetxt('output/PLS_pred.csv', Y_pred, delimiter=',')
-
-
-
+'''
 
 print('XGBOOST REGRESSOR')
 xgboost_seed = 19
 learning_rate = 0.1
 max_depth = 5
+reg_alpha = 1
+reg_lambda = 0.01
 xgb_r = xg.XGBRegressor(objective ='reg:squarederror', max_depth=max_depth,
-                        learning_rate = learning_rate, reg_alpha = 0,
-                        reg_lambda = 0, seed = xgboost_seed, n_estimators = 100)
+                        learning_rate = learning_rate, reg_alpha = reg_alpha,
+                        reg_lambda=reg_lambda, seed=xgboost_seed, n_estimators=8)
 
 # Fitting the model
 xgb_r.fit(X_train, y_train)
@@ -116,7 +116,7 @@ Y_pred = xgb_r.predict(X_train)
 t_corr = [np.corrcoef(y_train[:, j], Y_pred[:, j])[0, 1] for j in range(Y.shape[1])]
 t_r2 = [r2_score(y_train[:, j], Y_pred[:, j]) for j in range(Y.shape[1])]
 
-
+    
 Y_pred = xgb_r.predict(X_dev)
 
 np.savetxt('output/XGB_pred.csv', Y_pred, delimiter=',')
@@ -130,6 +130,45 @@ print(f'dev $R^2$ = {v_r2}')
 print(f'dev correlation coef = {v_corr}\n\n\n')
 
 
+'''
+xgboost_seed = 19
+
+learning_rate = 0.1
+max_depth = 5
+reg_alpha = 1
+reg_lambda = 0.01
+corr = []
+n_estimators = range(30)
+
+for n in n_estimators:
+    print(f'n = {n + 1}')
+    xgb_r = xg.XGBRegressor(objective ='reg:squarederror', max_depth=max_depth,
+                            learning_rate = learning_rate, reg_alpha = reg_alpha,
+                            reg_lambda=reg_lambda, seed=xgboost_seed, n_estimators=n+1)
+
+    # Fitting the model
+    xgb_r.fit(X_train, y_train)
+
+    
+    Y_pred = xgb_r.predict(X_train)
+    t_corr = [np.corrcoef(y_train[:, j], Y_pred[:, j])[0, 1] for j in range(Y.shape[1])]
+    t_r2 = [r2_score(y_train[:, j], Y_pred[:, j]) for j in range(Y.shape[1])]
+    
+    
+    Y_pred = xgb_r.predict(X_dev)
+    
+    #np.savetxt('output/XGB_pred.csv', Y_pred, delimiter=',')
+    v_corr = [np.corrcoef(y_dev[:, j], Y_pred[:, j])[0, 1] for j in range(Y.shape[1])]
+    v_r2 = [r2_score(y_dev[:, j], Y_pred[:, j]) for j in range(Y.shape[1])]
+    
+    print(f'training $R^2$ = {t_r2}')
+    print(f'training correlation coef = {t_corr}')
+    
+    print(f'dev $R^2$ = {v_r2}')
+    print(f'dev correlation coef = {v_corr}\n\n\n')
+    corr.append(v_corr)
+np.savetxt('output/XGB_N_est.csv', corr, delimiter=',')
+'''
 
 '''
 # Define the hyperparameter grid for a sweep
