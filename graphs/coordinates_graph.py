@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
 
 
-def calculate_correlation_coefficients(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3]) -> list[float]:
+def calculate_correlation_coefficients(true_data: np.ndarray, pred_data: np.ndarray) -> list:
     correlation_coefficients = [np.corrcoef(true_data[:, dim], pred_data[:, dim])[0, 1] for dim in range(3)]
     return correlation_coefficients
 
 
-def plot_coordinates(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3], total_time: int = 5,
+def plot_coordinates(true_data: np.ndarray, pred_data: np.ndarray, total_time: int = 5,
                      file_name: str = "plot") -> None:
     """
     Plots the coordinates of the true and predicted trajectories in 3 sub-plots (one for each dimension).

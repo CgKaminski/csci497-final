@@ -90,9 +90,6 @@ Y_pred = pls.predict(X_dev)
 v_corr = [np.corrcoef(y_dev[:, j], Y_pred[:, j])[0, 1] for j in range(Y.shape[1])]
 v_r2 = [r2_score(y_dev[:, j], Y_pred[:, j]) for j in range(Y.shape[1])]
 
-print(np.mean(Y_pred, axis=0))
-
-
 print(f'training $R^2$ = {t_r2}')
 print(f'training correlation coef = {t_corr}')
 
@@ -108,8 +105,8 @@ xgboost_seed = 19
 learning_rate = 0.1
 max_depth = 5
 xgb_r = xg.XGBRegressor(objective ='reg:squarederror', max_depth=max_depth,
-                        learning_rate = learning_rate, reg_alpha = 15,
-                        reg_lambda = 10, seed = xgboost_seed, n_estimators = 100)
+                        learning_rate = learning_rate, reg_alpha = 0,
+                        reg_lambda = 0, seed = xgboost_seed, n_estimators = 100)
 
 # Fitting the model
 xgb_r.fit(X_train, y_train)
@@ -137,16 +134,15 @@ print(f'dev correlation coef = {v_corr}\n\n\n')
 '''
 # Define the hyperparameter grid for a sweep
 param_grid = {
-    'max_depth': [5],
-    'learning_rate': [0.1],
-    'lambda' : [0, 0.01, 0.1, 1, 10, 15], # l2 penalty
-    'alpha' : [0, 0.01, 0.1, 1, 10, 15] # l1 penalty
+    'max_depth': [3, 5, 10],
+    'learning_rate': [0.01, 0.1, 1],
+    'reg_lambda' : [0, 0.01, 0.1, 1, 10], # l2 penalty
+    'reg_alpha' : [0, 0.01, 0.1, 1, 10] # l1 penalty
 }
 
 
 # Create the GridSearchCV object
-#grid_search = GridSearchCV(xgb_r, param_grid, cv=5, verbose=3, scoring=test)
-grid_search = GridSearchCV(xgb_r, param_grid, cv=5, verbose=3, scoring='neg_mean_squared_error')
+grid_search = GridSearchCV(xgb_r, param_grid, cv=5, verbose=3, scoring='neg_root_mean_squared_error')
 
 # Fit the GridSearchCV object to the training data
 grid_search.fit(X_train, y_train)
