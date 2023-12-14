@@ -3,7 +3,6 @@ from preprocessing import *
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
-#import torch
 import matplotlib.pyplot as plt
 from sklearn.cross_decomposition import PLSRegression
 import xgboost as xg
@@ -13,7 +12,7 @@ from sklearn.model_selection import GridSearchCV
 
 
 # generate data if not loading from a file
-
+'''
 fs = 1000 # sampling freq (Hz)
 ecog_data, motion_data = load_data()
 
@@ -29,8 +28,10 @@ hand_data, time = downsample(motion_data[['MotionTime','Experimenter:RHNDx','Exp
 #hand_df = pd.DataFrame(np.concatenate((time.reshape(-1,1), hand_data), axis=1), columns=['Time', 'Hand:x', 'Hand:y', 'Hand:z'])
 hand_df = pd.DataFrame(hand_data, columns=['Time', 'Hand:x', 'Hand:y', 'Hand:z'])
 hand_df = hand_df[hand_df['Time'] > 1.1]
-
 hand_df.to_csv('data/targets.csv', index=False)
+
+
+
 
 input_dataset = []
 for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all time steps'):
@@ -47,14 +48,13 @@ for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all t
 input_df = np.vstack(input_dataset)
 input_df = pd.DataFrame(input_df)
 input_df.to_csv('data/preprocessed_input.csv', index=False)
-
+'''
 
 
 inputs = pd.read_csv('data/preprocessed_input.csv')
 targets = pd.read_csv('data/targets.csv')
 
 
-print(targets)
 X = inputs.values
 Y = targets.values[:, 1:]
 
@@ -105,7 +105,7 @@ learning_rate = 0.1
 max_depth = 5
 xgb_r = xg.XGBRegressor(objective ='reg:squarederror', max_depth=max_depth,
                         learning_rate = learning_rate, reg_alpha = 15,
-                        reg_lambda = 10, seed = xgboost_seed, n_estimators = 100)
+                        reg_lambda = 10, seed = xgboost_seed, n_estimators = 10)
 
 # Fitting the model
 xgb_r.fit(X_train, y_train)
@@ -134,7 +134,6 @@ print(Y_pred.shape)
 
 
 
-'''
 # Define the hyperparameter grid for a sweep
 param_grid = {
     'max_depth': [5],
@@ -144,7 +143,7 @@ param_grid = {
 }
 
 # Create the GridSearchCV object
-grid_search = GridSearchCV(xgb_r, param_grid, cv=5, verbose=2, scoring='neg_root_mean_squared_error')
+grid_search = GridSearchCV(xgb_r, param_grid, cv=5, verbose=3, scoring='neg_mean_squared_error')
 
 # Fit the GridSearchCV object to the training data
 grid_search.fit(X_train, y_train)
@@ -152,4 +151,3 @@ grid_search.fit(X_train, y_train)
 # Print the best set of hyperparameters and the corresponding score
 print("Best set of hyperparameters: ", grid_search.best_params_)
 print("Best score: ", grid_search.best_score_)
-'''
