@@ -22,7 +22,7 @@ for key in tqdm(ecog_data.keys()[1:], desc='Band Pass Filter'):
     ecog_data[key] = band_pass_filter(ecog_data[key].values)
 
 filt_ecog_data = ecog_data.values[:,1:]
-car_ecog_data = car(filt_ecog_data)
+#filt_ecog_data = car(filt_ecog_data)
 
 hand_data, time = downsample(motion_data[['MotionTime','Experimenter:RHNDx','Experimenter:RHNDy','Experimenter:RHNDz']])
 
@@ -37,9 +37,11 @@ for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all t
     neuron_data = []
     for neuron in range(64):
         start_index = ecog_data.index[ecog_data['ECoG_time'] == start_time][0]
-        batch = car_ecog_data[:,neuron][start_index-1100:start_index]
-        _, wavelet_scalogram, _ = morlet_wavelet_transform(batch, 1000)
-        neuron_data.append(wavelet_scalogram.flatten())
+        batch = filt_ecog_data[:,neuron][start_index-1100:start_index]
+        batch = np.reshape(batch, (10, 10, -1))
+        batch = batch.mean(axis=2)
+
+        neuron_data.append(batch.flatten())
     time_data = np.hstack(neuron_data)
     del neuron_data
     input_dataset.append(time_data)

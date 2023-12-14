@@ -34,10 +34,11 @@ def main():
     
     return
 
+'''
 def band_pass_filter(data):
     fs = 1000  # Sampling rate in Hz
     low = 0.1  # Low cutoff frequency in Hz
-    high = 499.9999  # High cutoff frequency in Hz
+    high = 400  # High cutoff frequency in Hz
 
     N = 3  # Filter order
     sos = butter(N, [low, high], btype='bandpass', output='sos', fs=fs)  # Build filter
@@ -56,7 +57,17 @@ def band_pass_filter(data):
     if remaining_data.size > 0:
         filtered.extend(sosfilt(sos, remaining_data))
 
-    return np.array(filtered)
+    ret = np.array(filtered)
+    return ret
+'''
+
+def band_pass_filter(data, lowcut=0.1, highcut=499, fs=1000, order=3):
+    nyq = 0.5 * fs  # Nyquist Frequency
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = signal.butter(order, [low, high], btype='band')
+    filtered_data = signal.filtfilt(b, a, data)
+    return filtered_data
 
 '''
 def car(data):
@@ -76,17 +87,18 @@ def downsample(df , original_fs=1000, target_fs=20):
     downsampled_time = times[::factor]
     return downsampled_data, downsampled_time
 
-def morlet_wavelet_transform1(batch, fs):
+'''
+def morlet_wavelet_transform(batch, fs):
     center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
+    num_freqs = 10
+    coarsest_scale = 7
+    time_window = int(1.1 * fs)
 
-    wavelet_central_freq = 5.5
-
-    # Calculate scales corresponding to the center frequencies
-    scales = wavelet_central_freq / center_freqs * fs / (2 * np.pi)
-
-    scalogram_t, _ = pywt.cwt(batch, scales, 'morl', sampling_period=1/fs)
+    scalograms = []
+    
+    scalogram_t, _ = pywt.cwt(batch, center_freqs, 'morl')
     scalogram = np.abs(scalogram_t)
-
+    
     scalogram_bin = scalogram.reshape(10, 10, -1)
     scalogram_bin = scalogram_bin.mean(axis=2)
 
@@ -95,8 +107,8 @@ def morlet_wavelet_transform1(batch, fs):
 
     normalized_scalogram = (scalogram_bin - mean[:, np.newaxis]) / std[:, np.newaxis]
 
-    return scalogram, scalogram_bin, normalized_scalogram
-
+    return scalogram, scalogram_bin, normalized_scalogram 
+'''
 
 def morlet_wavelet_transform(batch, fs):
     center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
@@ -107,10 +119,10 @@ def morlet_wavelet_transform(batch, fs):
     scalogram_bin = scalogram.reshape(10, 10, -1)
     scalogram_bin = scalogram_bin.mean(axis=2)
 
-    mean = scalogram_bin.mean(axis=1)
-    std = scalogram_bin.std(axis=1)
+    mean = scalogram_bin.mean(axis=0)
+    std = scalogram_bin.std(axis=0)
 
-    normalized_scalogram = (scalogram_bin - mean[:, np.newaxis]) / std[:, np.newaxis]
+    normalized_scalogram = (scalogram_bin - mean[np.newaxis, :]) / std[np.newaxis, :]
 
     return scalogram, scalogram_bin, normalized_scalogram
 
