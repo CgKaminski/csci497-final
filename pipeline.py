@@ -104,9 +104,10 @@ learning_rate = 0.1
 max_depth = 5
 reg_alpha = 1
 reg_lambda = 0.01
+n_est = 10
 xgb_r = xg.XGBRegressor(objective ='reg:squarederror', max_depth=max_depth,
-                        learning_rate = learning_rate, reg_alpha = reg_alpha,
-                        reg_lambda=reg_lambda, seed=xgboost_seed, n_estimators=8)
+                learning_rate = learning_rate, reg_alpha = reg_alpha,
+                reg_lambda=reg_lambda, seed=xgboost_seed, n_estimators=n_est)
 
 # Fitting the model
 xgb_r.fit(X_train, y_train)
