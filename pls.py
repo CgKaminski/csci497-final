@@ -9,7 +9,7 @@ X = inputs.values[:, 1:]
 Y = targets.values[:, 2:]
 
 
-pls = PLSRegression(n_components=1)
+pls = PLSRegression(n_components=21)
 pls.fit(X, Y)
 
 Y_pred = pls.predict(X)
