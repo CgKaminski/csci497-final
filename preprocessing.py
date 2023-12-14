@@ -39,9 +39,19 @@ def band_pass_filter(data):
     fs = 1000  # Sampling rate in Hz
     low = 0.1  # Low cutoff frequency in Hz
     high = 400  # High cutoff frequency in Hz
-
+    
     N = 3  # Filter order
     sos = butter(N, [low, high], btype='bandpass', output='sos', fs=fs)  # Build filter
+   
+
+    fs = 1000 # 1 kHz == 1000Hz sampling rate
+    nyq = 0.5 * fs # calculate nyquist 
+    low = 0.1 / nyq # 0.1 Hz low end of filter
+    high = 499 / nyq # should be 600 Hz high end of filter -- had to use 400 to get code working.
+    N = 3 # order
+    Wn = [low, high] # critical frequencies 
+    sos = butter(N, Wn, btype='bandpass', output='sos') # build filter
+     
 
     batches = int(len(data) / fs)
     filtered = []

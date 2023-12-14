@@ -13,7 +13,7 @@ from sklearn.model_selection import GridSearchCV
 
 
 # generate data if not loading from a file
-'''
+
 fs = 1000 # sampling freq (Hz)
 ecog_data, motion_data = load_data()
 
@@ -48,7 +48,7 @@ input_df = np.vstack(input_dataset)
 input_df = pd.DataFrame(input_df)
 input_df.to_csv('data/preprocessed_input.csv', index=False)
 
-'''
+
 
 inputs = pd.read_csv('data/preprocessed_input.csv')
 targets = pd.read_csv('data/targets.csv')
