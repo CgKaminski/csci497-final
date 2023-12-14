@@ -43,7 +43,7 @@ def plot_coordinates(true_data: np.ndarray[..., 3], pred_data: np.ndarray[..., 3
     for dim, title in enumerate(['X-position (normalized)', 'Y-position (normalized)', 'Z-position (normalized)']):
         axs[dim].set_ylabel(title)
 
-    axs[0].legend(bbox_to_anchor=(1.0, 1.15), loc="upper right", ncol=2)
+    axs[0].legend(bbox_to_anchor=(1.0, 1.25), loc="upper right", frameon=False, ncol=1)
 
     plt.tight_layout()
     plt.savefig(file_name)
