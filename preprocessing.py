@@ -38,8 +38,7 @@ def band_pass_filter(data):
     fs = 1000 # 1 kHz == 1000Hz sampling rate
     nyq = 0.5 * fs # calculate nyquist 
     low = 0.1 / nyq # 0.1 Hz low end of filter
-    high = 400 / nyq # should be 600 Hz high end of filter -- had to use 400 to get code working.
-
+    high = 499 / nyq # should be 600 Hz high end of filter -- had to use 400 to get code working.
     N = 3 # order
     Wn = [low, high] # critical frequencies 
     sos = butter(N, Wn, btype='bandpass', output='sos') # build filter
@@ -60,7 +59,8 @@ def band_pass_filter(data):
     return filtered
 
 def car(data):
-    avg_reference = data - np.mean(data, axis=0)
+    # take average across each row (per time bin)
+    avg_reference = (data.T - np.mean(data, axis=1)).T
     return avg_reference
 
 def downsample(df , original_fs=1000, target_fs=20):

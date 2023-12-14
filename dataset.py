@@ -1,7 +1,8 @@
-import torch
+#import torch
 import pandas as pd
 import numpy as np
 
+'''
 class K1Dataset(torch.utils.data.Dataset):
     def __init__(self):
         self.ecog, self.motion = load_data()
@@ -21,6 +22,7 @@ class K1Dataset(torch.utils.data.Dataset):
         sample, target = self.__getitem__(0)
 
         return len(sample), len(target)
+'''
 
 def load_data():
     data_path = 'data'
