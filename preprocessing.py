@@ -34,33 +34,38 @@ def main():
     return
 
 def band_pass_filter(data):
-    fs = 1000 # 1 kHz == 1000Hz sampling rate
-    nyq = 0.5 * fs # calculate nyquist 
-    low = 0.1 / nyq # 0.1 Hz low end of filter
-    high = 400 / nyq # should be 600 Hz high end of filter -- had to use 400 to get code working.
+    fs = 1000  # Sampling rate in Hz
+    low = 0.1  # Low cutoff frequency in Hz
+    high = 499.9999  # High cutoff frequency in Hz
 
-    N = 3 # order
-    Wn = [low, high] # critical frequencies 
-    sos = butter(N, Wn, btype='bandpass', output='sos') # build filter
+    N = 3  # Filter order
+    sos = butter(N, [low, high], btype='bandpass', output='sos', fs=fs)  # Build filter
 
-    
     batches = int(len(data) / fs)
     filtered = []
 
     for i in range(batches):
-        # apply filter over each second
-        batch_data = data[:fs]
-        data = data[fs:]
-        filtered += list(sosfilt(sos, batch_data)) 
+        # Apply filter over each second
+        batch_data = data[i * fs:(i + 1) * fs]
+        filtered_batch = sosfilt(sos, batch_data)
+        filtered.extend(filtered_batch)
 
-    # filter left-over data
-    filtered += list(sosfilt(sos, data))
+    # Filter remaining data if any
+    remaining_data = data[batches * fs:]
+    if remaining_data.size > 0:
+        filtered.extend(sosfilt(sos, remaining_data))
 
-    return filtered
+    return np.array(filtered)
 
+'''
 def car(data):
     avg_reference = data - np.mean(data, axis=0)
     return avg_reference
+'''
+def car(ecog_data):
+    average_signal = np.mean(ecog_data, axis=1)
+    car_ecog_data = ecog_data - average_signal[:, np.newaxis]
+    return car_ecog_data
 
 def downsample(df , original_fs=1000, target_fs=20):
     data = df.values
