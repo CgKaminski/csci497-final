@@ -1,10 +1,11 @@
 from scipy.signal import butter, sosfilt, morlet2, spectrogram
+from neurodsp.timefrequency import compute_wavelet_transform
 from tqdm import tqdm
 import pandas
 import pywt
 import numpy as np
 import matplotlib.pyplot as plt
-
+import scipy.signal as signal
 def main():
     ecog_path = 'data/ECoG.csv'
     motion_path = 'data/Motion.csv'
@@ -75,20 +76,17 @@ def downsample(df , original_fs=1000, target_fs=20):
     downsampled_time = times[::factor]
     return downsampled_data, downsampled_time
 
-def morlet_wavelet_transform(batch, fs):
-    ''' input - ecog data in time window for a single neuron
-        output - scalogram, scalogram_bin, normalized_scalogram  '''
-
+def morlet_wavelet_transform1(batch, fs):
     center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
-    num_freqs = 10
-    coarsest_scale = 7
-    time_window = int(1.1 * fs)
 
-    scalograms = []
-    
-    scalogram_t, _ = pywt.cwt(batch, center_freqs, 'morl')
+    wavelet_central_freq = 5.5
+
+    # Calculate scales corresponding to the center frequencies
+    scales = wavelet_central_freq / center_freqs * fs / (2 * np.pi)
+
+    scalogram_t, _ = pywt.cwt(batch, scales, 'morl', sampling_period=1/fs)
     scalogram = np.abs(scalogram_t)
-    
+
     scalogram_bin = scalogram.reshape(10, 10, -1)
     scalogram_bin = scalogram_bin.mean(axis=2)
 
@@ -97,8 +95,24 @@ def morlet_wavelet_transform(batch, fs):
 
     normalized_scalogram = (scalogram_bin - mean[:, np.newaxis]) / std[:, np.newaxis]
 
-    return scalogram, scalogram_bin, normalized_scalogram 
-    
+    return scalogram, scalogram_bin, normalized_scalogram
+
+
+def morlet_wavelet_transform(batch, fs):
+    center_freqs = np.logspace(np.log10(10), np.log10(150), 10)
+
+    scalogram_t = compute_wavelet_transform(batch, fs=fs, freqs=center_freqs)
+    scalogram = np.abs(scalogram_t)
+
+    scalogram_bin = scalogram.reshape(10, 10, -1)
+    scalogram_bin = scalogram_bin.mean(axis=2)
+
+    mean = scalogram_bin.mean(axis=1)
+    std = scalogram_bin.std(axis=1)
+
+    normalized_scalogram = (scalogram_bin - mean[:, np.newaxis]) / std[:, np.newaxis]
+
+    return scalogram, scalogram_bin, normalized_scalogram
 
 
 if __name__ == '__main__':
