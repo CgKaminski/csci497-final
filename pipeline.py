@@ -3,16 +3,9 @@ from preprocessing import *
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.cross_decomposition import PLSRegression
-import xgboost as xg
-from sklearn.metrics import mean_squared_error as MSE 
-from sklearn.metrics import r2_score
-from sklearn.model_selection import GridSearchCV
 
 
 # generate data if not loading from a file
-'''
 fs = 1000 # sampling freq (Hz)
 ecog_data, motion_data = load_data()
 
@@ -53,9 +46,8 @@ for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all t
 input_df = np.vstack(input_dataset)
 input_df = pd.DataFrame(input_df)
 input_df.to_csv('data/preprocessed_input.csv', index=False)
-'''
 
-
+"""
 
 
 
@@ -191,3 +183,4 @@ grid_search.fit(X_train, y_train)
 print("Best set of hyperparameters: ", grid_search.best_params_)
 print("Best score: ", grid_search.best_score_)
 '''
+"""
