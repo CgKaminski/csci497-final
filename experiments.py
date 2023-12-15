@@ -37,9 +37,6 @@ def gen_data():
     hand_df['Hand:z'] = normalized[:, 2]
     hand_df.to_csv('data/targets.csv', index=False)
 
-
-
-
     input_dataset = []
     for start_time in tqdm(hand_df['Time'].values, desc='Wavelet Transform for all time steps'):
         neuron_data = []
@@ -75,9 +72,9 @@ def sweep_n_components(X_train, y_train, X_dev, y_dev):
         
         Y_pred = pls.predict(X_dev)
         
-        r2 = [r2_score(y_dev[j, :], Y_pred[j, :]) for j in range(Y_pred.shape[0])]
+        r2 = [r2_score(y_dev[:, j], Y_pred[:, j]) for j in range(Y_pred.shape[1])]
         
-        PRESS_vals += list(np.sum((y_dev - Y_pred)**2, axis=1))   
+        PRESS_vals += list(np.sum((y_dev - Y_pred)**2, axis=0))   
         r2_vals += r2
         x_vals += [(num + 1)] * len(r2)
         #print(len(PRESS))
